@@ -1,0 +1,30 @@
+---
+- name: Mysql Dump
+  hosts: mysqldump
+  become: yes
+  become_method: sudo
+  vars_prompt:
+    - name: "username"
+      prompt: "Enter your mysql username"
+      private: no
+    - name: "mysqlpassword"
+      prompt: "Enter your mysql password"
+      private: yes
+    - name: "DatabaseName"
+      prompt: "Enter Database Name to Dump"
+      private: no
+    - name: "dumpname"
+      prompt: "Enter database dump name "
+      private: no 
+      
+  tasks:
+    - name: 1. Install MySQL-python27 Mandatory Package
+      yum: name=MySQL-python27 state=installed
+
+    - name: 2. Dump all mysql  databases
+      mysql_db:
+        state: dump
+        login_user: "{{ username }}"
+        login_password: "{{ mysqlpassword  }}"
+        name: "{{DatabaseName}}"
+        target: /tmp/{{ dumpname }}.sql

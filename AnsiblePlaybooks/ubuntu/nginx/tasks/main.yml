@@ -1,0 +1,100 @@
+---
+#- name: Disable default pool
+#  command: yum update -y
+
+- name: Install nginx
+  apt: name={{item}} state=installed
+  with_items:
+      - nginx
+     # - nginx-all-modules 
+
+- name: Copy nginx conf
+  template: src=nginx.conf dest=/etc/nginx/nginx.conf
+
+     
+- name: Copy nginx configuration for wordpress
+  template: src=default.conf dest=/etc/nginx/conf.d/default.conf
+  notify: restart nginx
+
+- name:  restart nginx
+  service: name=nginx state=restarted
+
+
+- name: Install list of packages
+  apt: name={{item}} state=installed
+  with_items:
+       - php
+       - php-bcmath
+       - php-cli
+       - php-common
+       - php-dbg
+       - php-fpm
+       - php-dba
+       - php-devel
+       - php-embedded
+       - php-enchant
+       - php-gd
+       - php-intl
+       - php-ldap
+       - php-mbstring
+       - php-mysqlnd
+       - php-pdo
+       - php-process
+       - php-pspell
+       - php-recode
+       - php-snmp
+       - php-soap
+       - php-xml
+       - php-xmlrpc
+       - php-pecl-memcache
+       - php-pecl-memcached
+       - php-pecl-apc
+       - php-opcache
+
+- name: Disable default pool
+  command: mv /etc/php-fpm.d/www.conf /etc/php-fpm.d/www.disabled creates=/etc/php-fpm.d/www.disabled
+  notify: restart php-fpm
+
+- name: Copy php-fpm configuration
+  template: src=www.conf dest=/etc/php-fpm.d/
+  notify: restart php-fpm
+
+- name: Expose php off in php.ini
+  lineinfile: dest=/etc/php.ini regexp="^expose_php = On" insertafter="^#expose_php = On" line="expose_php = Off" state=present
+
+- name:  increae the size  
+  lineinfile: dest=/etc/php.ini regexp="^upload_max_filesize = 2M" insertafter="^#upload_max_filesize = 2M" line="upload_max_filesize = 24M" state=present
+
+- name:  increase post size   
+  lineinfile: dest=/etc/php.ini regexp="^post_max_size = 8M" insertafter="^#post_max_size = 8M" line="post_max_size = 32M"  state=present
+
+- name:  restart nginx
+  service: name=nginx state=restarted
+
+  #- name: Install mysql56 package
+  # yum: name=mysql56 state=installed
+#- name:  Enable SSH 2 protocal
+#  lineinfile: dest=/etc/ssh/sshd_config regexp="^#Protocol 2" insertafter="^#Protocol 2" line="Protocol 2"  state=present
+
+#- name: open port in sshe file
+#  lineinfile: dest=/etc/ssh/sshd_config regexp="^#Port 22" insertafter="^#Port 22" line="Port 22"  state=present
+
+#- lineinfile: dest=/etc/ssh/sshd_config regexp="^#StrictModes yes" insertafter="^#StrictModes yes" line="StrictModes yes"  state=present
+
+#- name: Enable Max authontication
+#  lineinfile: dest=/etc/ssh/sshd_config regexp="^#MaxAuthTries 6" insertafter="^#MaxAuthTries 6" line="MaxAuthTries 6"  state=present
+
+#- name: Enable chanllengeresponse authentication
+#  command: sed -i 's/.*ChallengeResponseAuthentication.*no/ ChallengeResponseAuthentication yes/g'  /etc/ssh/sshd_config
+
+#- name: Disable root login
+#  command: sed -i 's/.*PermitRootLogin.*yes/PermitRootLogin no/g' /etc/ssh/sshd_config
+
+#- name: password expire setting
+ # command: chage -m 1 -M 30 -W 14 -I 40 -E "30-12-2016" ashok
+
+#- name: create new user
+#  user: name=test1 shell=/bin/bash password=password 
+
+#- name: Insert "test1" configuation block in /etc/sudoers
+ # lineinfile: "dest=/etc/sudoers state=present regexp='^%test1' line='test1 ALL=(ALL)  ALL'"

@@ -1,0 +1,17 @@
+---
+- name: ANSIBLE - Shop Installation
+  hosts: kellton
+  become: yes
+  become_method: sudo
+  vars_prompt:
+    - name: "githubuser"
+      prompt: "Enter your github username"
+      private: no
+    - name: "githubpassword"
+      prompt: "Enter your github password"
+      private: yes
+
+  tasks: 
+    - name: git revert   
+      command: git reset --hard HEAD~  chdir=/usr/share/nginx/html/temprepo/
+

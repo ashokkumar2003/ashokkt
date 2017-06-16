@@ -1,0 +1,17 @@
+---
+- name: ANSIBLE - Shop Installation
+  hosts: kloud
+  become: yes
+  become_method: sudo
+  vars_prompt:
+    - name: "githubuser"
+      prompt: "Enter your github username"
+      private: no
+    - name: "githubpassword"
+      prompt: "Enter your github password"
+      private: yes
+
+
+  tasks:
+    - name: Get Clone of the Repository
+      git: repo=https://{{ githubuser }}:{{ githubpassword }}@gitlab.kelltontech.net/kloudhive/kloudhive.git  dest=/usr/share/nginx/html/kloudhive version=prod1.1
